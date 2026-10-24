@@ -24,7 +24,7 @@ final class DictationViewModel: ObservableObject {
     init() {
         let loadedSessions = store.load()
         var removedModelMarkers = false
-        sessions = loadedSessions.map { storedSession in
+        let migratedSessions = loadedSessions.map { storedSession in
             var session = storedSession
             let cleanRawText = TextPolisher.removingModelMarkers(from: session.rawText)
             let cleanText = TextPolisher.removingModelMarkers(from: session.cleanedText)
@@ -35,10 +35,11 @@ final class DictationViewModel: ObservableObject {
             }
             return session
         }
-        if removedModelMarkers { store.save(sessions) }
-        activeSessionID = loadedSessions.first?.id
+        sessions = migratedSessions
+        activeSessionID = migratedSessions.first?.id
         selectedMicrophoneID = UserDefaults.standard.string(forKey: "selectedMicrophoneID")
         selectedLanguageID = UserDefaults.standard.string(forKey: "selectedLanguageID") ?? Locale.current.identifier
+        if removedModelMarkers { store.save(migratedSessions) }
         refreshMicrophones()
     }
 
