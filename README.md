@@ -11,7 +11,7 @@ Voice Café is a native macOS dictation app that turns speech into editable text
 - Record from a selected microphone, with an input-level indicator.
 - Show live partial text through Apple Speech when Speech Recognition permission is enabled and the selected language supports on-device recognition.
 - Use WhisperKit as a local fallback when Apple Speech returns no words. Whisper model files are downloaded once and cached; audio transcription runs on-device.
-- Review the raw transcript and a polished version, edit the result, and copy it to paste into another app.
+- Review the raw transcript and a polished version, edit the result, then share it with compatible macOS apps or copy it from the Share button’s context menu.
 - Apply local cleanup for filler words, spacing, capitalization, punctuation, and spoken formatting commands such as “new line,” “new paragraph,” “comma,” and “question mark.”
 - Keep a searchable history of dictations and their audio recordings; reopen previous sessions or delete a session and its audio.
 - View session duration, word count, processing steps, and a summary.
@@ -29,7 +29,7 @@ Voice Café is a native macOS dictation app that turns speech into editable text
 3. Allow microphone access. Allow Speech Recognition for live partial text; if you decline, recording and the local Whisper fallback remain available, but text appears after recording finishes.
 4. Choose the microphone and language from the controls along the bottom of the window.
 
-Press **⇧⌘R** to start or stop recording, **⌘N** for a new dictation, and **⌥⌘C** to copy the polished transcript. Paste into another app with **⌘V**.
+Press **⇧⌘R** to start or stop recording, **⌘N** for a new dictation, and **⌥⌘C** to copy the polished transcript. The Share button opens macOS sharing destinations for compatible apps; right-click it to copy. Paste copied text into another app with **⌘V**.
 
 ## Local storage and privacy
 

@@ -152,11 +152,24 @@ struct ContentView: View {
                 }
                 Spacer()
                 if !showingRaw {
-                    Button { model.copyText() } label: {
-                        Label("Copy", systemImage: "doc.on.doc").font(.system(size: 11, weight: .medium))
+                    ShareLink(
+                        item: session.cleanedText,
+                        subject: Text(session.title),
+                        preview: SharePreview(session.title, image: Image(systemName: "waveform"))
+                    ) {
+                        Label("Share", systemImage: "square.and.arrow.up").font(.system(size: 11, weight: .medium))
                             .foregroundStyle(Color.ink).padding(.horizontal, 11).padding(.vertical, 7)
                             .background(Color.white, in: Capsule())
-                    }.buttonStyle(.plain).disabled(session.cleanedText.isEmpty)
+                    }
+                    .buttonStyle(.plain)
+                    .disabled(session.cleanedText.isEmpty)
+                    .help("Share this transcript with compatible apps")
+                    .contextMenu {
+                        Button { model.copyText() } label: {
+                            Label("Copy Transcript", systemImage: "doc.on.doc")
+                        }
+                        .disabled(session.cleanedText.isEmpty)
+                    }
                 }
             }.padding(.horizontal, 26).padding(.top, 16).padding(.bottom, 12)
             Rectangle().fill(Color.black.opacity(0.06)).frame(height: 1)
