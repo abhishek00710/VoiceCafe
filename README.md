@@ -2,6 +2,10 @@
 
 Voice Café is a native macOS dictation app that turns speech into editable text while keeping recordings and transcription on your Mac.
 
+## Preview
+
+![Voice Café empty state](docs/screenshots/voice-cafe-empty-state.png)
+
 ## Features
 
 - Record from a selected microphone, with an input-level indicator.
