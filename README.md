@@ -10,7 +10,7 @@ Voice Café is a native macOS dictation app that turns speech into editable text
 
 - Record from a selected microphone, with an input-level indicator.
 - Show live partial text through Apple Speech when Speech Recognition permission is enabled and the selected language supports on-device recognition.
-- Use WhisperKit as a local fallback when Apple Speech returns no words. Whisper model files are downloaded once and cached; audio transcription runs on-device.
+- Use WhisperKit as a local fallback when Apple Speech returns no words. The multilingual model honors the selected language, downloads once, and transcribes audio on-device.
 - Review the raw transcript and a polished version, edit the result, then share it with compatible macOS apps or copy it from the Share button’s context menu.
 - Apply local cleanup for filler words, spacing, capitalization, punctuation, and spoken formatting commands such as “new line,” “new paragraph,” “comma,” and “question mark.”
 - Keep a searchable history of dictations and their audio recordings; reopen previous sessions or delete a session and its audio.
@@ -20,7 +20,7 @@ Voice Café is a native macOS dictation app that turns speech into editable text
 
 - macOS 14 or later
 - Xcode 16 or later
-- Internet access the first time WhisperKit downloads its model files
+- Internet access and about 626 MB of free storage for WhisperKit’s one-time multilingual model download
 
 ## Build and run
 
@@ -37,7 +37,7 @@ Session metadata and transcripts are stored in `sessions.json`; audio files are 
 
 `~/Library/Application Support/VoiceCafe/`
 
-Speech recognition runs locally using Apple’s on-device Speech recognizer or WhisperKit. Voice Café does not send audio to a transcription API. Whisper model files are fetched from the internet on first use and cached locally.
+Speech recognition runs locally using Apple’s on-device Speech recognizer or WhisperKit. Voice Café does not send audio to a transcription API. WhisperKit’s multilingual model (about 626 MB) is fetched once and cached locally.
 
 ## Implementation
 
