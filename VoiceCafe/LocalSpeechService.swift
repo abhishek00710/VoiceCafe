@@ -264,10 +264,7 @@ final class LocalSpeechService {
                 if let cached = self?.whisperKit {
                     pipeline = cached
                 } else {
-                    // Use WhisperKit's multilingual Turbo model for substantially
-                    // better accuracy than the small base model, especially for
-                    // non-English dictation such as Hindi.
-                    pipeline = try await WhisperKit(WhisperKitConfig(model: "large-v3-v20240930_626MB"))
+                    pipeline = try await WhisperKit(WhisperKitConfig(model: "base"))
                 }
                 let options = DecodingOptions(task: .transcribe, language: languageCode, skipSpecialTokens: true)
                 let results = try await pipeline.transcribe(audioPath: url.path, decodeOptions: options)
