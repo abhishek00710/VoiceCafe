@@ -51,8 +51,23 @@ struct AudioInput: Identifiable, Hashable {
 }
 
 enum TextPolisher {
+    static func removingModelMarkers(from input: String) -> String {
+        let marker = "\u{E000}"
+        var text = input.replacingOccurrences(
+            of: #"\[BLANK_AUDIO\]"#,
+            with: marker,
+            options: [.regularExpression, .caseInsensitive]
+        )
+        let duplicatePunctuationPattern = "([.!?])\\s*\(NSRegularExpression.escapedPattern(for: marker))\\s*[.!?]?"
+        text = text.replacingOccurrences(of: duplicatePunctuationPattern, with: "$1", options: .regularExpression)
+        return text
+            .replacingOccurrences(of: marker, with: " ")
+            .replacingOccurrences(of: #"[ \t]+"#, with: " ", options: .regularExpression)
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
     static func polish(_ input: String) -> (text: String, explanation: String) {
-        var text = input
+        var text = removingModelMarkers(from: input)
         let original = text
         let rules: [(String, String)] = [
             (#"(?i)\b(um+|uh+|erm|er)\b[ ,]*"#, ""),

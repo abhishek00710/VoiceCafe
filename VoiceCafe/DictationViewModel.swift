@@ -23,7 +23,19 @@ final class DictationViewModel: ObservableObject {
 
     init() {
         let loadedSessions = store.load()
-        sessions = loadedSessions
+        var removedModelMarkers = false
+        sessions = loadedSessions.map { storedSession in
+            var session = storedSession
+            let cleanRawText = TextPolisher.removingModelMarkers(from: session.rawText)
+            let cleanText = TextPolisher.removingModelMarkers(from: session.cleanedText)
+            if cleanRawText != session.rawText || cleanText != session.cleanedText {
+                removedModelMarkers = true
+                session.rawText = cleanRawText
+                session.cleanedText = cleanText
+            }
+            return session
+        }
+        if removedModelMarkers { store.save(sessions) }
         activeSessionID = loadedSessions.first?.id
         selectedMicrophoneID = UserDefaults.standard.string(forKey: "selectedMicrophoneID")
         selectedLanguageID = UserDefaults.standard.string(forKey: "selectedLanguageID") ?? Locale.current.identifier
@@ -144,7 +156,8 @@ final class DictationViewModel: ObservableObject {
             Task { @MainActor in
                 guard let self else { return }
                 guard let index = self.sessions.firstIndex(where: { $0.id == id }) else { return }
-                guard duration >= 0.45, !raw.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+                let transcript = TextPolisher.removingModelMarkers(from: raw)
+                guard duration >= 0.45, !transcript.isEmpty else {
                     self.sessions[index].steps.append(ProcessingStep(title: "No speech detected", detail: "The recording was too short or contained no recognizable words.", success: false))
                     self.sessions[index].summary = "No transcription was created. Try speaking a little longer and closer to the selected microphone."
                     self.sessions[index].updatedAt = .now
@@ -155,10 +168,10 @@ final class DictationViewModel: ObservableObject {
                     return
                 }
                 self.status = .processing
-                self.sessions[index].rawText = raw
+                self.sessions[index].rawText = transcript
                 self.sessions[index].duration = duration
                 self.sessions[index].steps.append(ProcessingStep(title: "On-device transcription", detail: "Speech was recognized with the system model. No audio was sent to a server."))
-                let polished = TextPolisher.polish(raw)
+                let polished = TextPolisher.polish(transcript)
                 self.sessions[index].cleanedText = polished.text
                 self.sessions[index].steps.append(ProcessingStep(title: "Readability cleanup", detail: polished.explanation))
                 self.sessions[index].title = self.sessionTitle(from: polished.text)
@@ -226,7 +239,7 @@ final class DictationViewModel: ObservableObject {
 
     private func updateRaw(_ text: String) {
         guard let id = activeSessionID, let index = sessions.firstIndex(where: { $0.id == id }) else { return }
-        sessions[index].rawText = text
+        sessions[index].rawText = TextPolisher.removingModelMarkers(from: text)
         sessions[index].updatedAt = .now
         persist()
     }
