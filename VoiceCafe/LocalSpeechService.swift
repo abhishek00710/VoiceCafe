@@ -2,7 +2,7 @@ import AVFoundation
 import AudioToolbox
 import CoreAudio
 import Speech
-import WhisperKit
+@preconcurrency import WhisperKit
 
 final class LocalSpeechService {
     private let engine = AVAudioEngine()
@@ -27,6 +27,7 @@ final class LocalSpeechService {
     private var whisperKit: WhisperKit?
     private var whisperTask: Task<Void, Never>?
     private var isWhisperRunning = false
+    private var whisperLanguageCode: String?
 
     static func availableInputs() -> [AudioInput] {
         var address = AudioObjectPropertyAddress(mSelector: kAudioHardwarePropertyDevices,
@@ -60,6 +61,8 @@ final class LocalSpeechService {
         // optional: the local Whisper model can still transcribe the saved recording
         // when Apple Speech is unavailable or returns no words.
         let recognizer = SFSpeechRecognizer(locale: locale)
+        let localeIdentifier = locale.identifier.replacingOccurrences(of: "_", with: "-")
+        whisperLanguageCode = String(localeIdentifier.prefix(while: { $0 != "-" })).lowercased()
         self.recognizer = (SFSpeechRecognizer.authorizationStatus() == .authorized
                            && recognizer?.isAvailable == true
                            && recognizer?.supportsOnDeviceRecognition == true)
@@ -254,6 +257,7 @@ final class LocalSpeechService {
         }
         stopTimeout = timeout
         DispatchQueue.main.asyncAfter(deadline: .now() + 180, execute: timeout)
+        let languageCode = whisperLanguageCode
         whisperTask = Task { [weak self] in
             do {
                 let pipeline: WhisperKit
@@ -262,7 +266,8 @@ final class LocalSpeechService {
                 } else {
                     pipeline = try await WhisperKit(WhisperKitConfig(model: "base"))
                 }
-                let results = try await pipeline.transcribe(audioPath: url.path)
+                let options = DecodingOptions(task: .transcribe, language: languageCode, skipSpecialTokens: true)
+                let results = try await pipeline.transcribe(audioPath: url.path, decodeOptions: options)
                 let transcription = results.map(\.text).joined(separator: " ").trimmingCharacters(in: .whitespacesAndNewlines)
                 DispatchQueue.main.async {
                     guard let self, self.pendingStop != nil else { return }
